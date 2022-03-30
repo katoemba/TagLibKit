@@ -10,6 +10,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern const NSString *AP_LENGTH;
+extern const NSString *AP_BITRATE;
+extern const NSString *AP_SAMPLERATE;
+extern const NSString *AP_BITSPERSAMPLE;
+
 @interface TaglibWrapper : NSObject
 
 + (nullable NSString *)getTitle:(NSString *)path;
@@ -28,6 +33,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (nullable NSString *)detectFileType:(NSString *)path;
 + (nullable NSString *)detectStreamType:(NSString *)path;
++ (nullable NSMutableDictionary *)getAudioProperties:(NSString *)path;
+
++ (bool)setCover:(NSString *)path coverURL:(NSURL*)coverURL;
++ (nullable NSData *)coverArtData:(NSString *)path;
 
 @end
 

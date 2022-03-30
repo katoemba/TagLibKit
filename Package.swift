@@ -8,7 +8,7 @@ let package = Package(
     .library(name: "TagLibKit", targets: ["TagLibKit"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/NCrusher74/TagLib-SPM", .branch("master"))
+    .package(url: "https://github.com/katoemba/TagLib-SPM", .branch("master"))
   ],
   targets: [
     .target(
