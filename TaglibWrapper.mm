@@ -40,7 +40,7 @@ const NSString *AP_BITSPERSAMPLE = @"AP_BITSPERSAMPLE";
     if (fileRef.isNull()) {
         return nil;
     }
-
+    
     TagLib::Tag *tag = fileRef.tag();
     if (!tag) {
         return nil;
@@ -56,7 +56,7 @@ const NSString *AP_BITSPERSAMPLE = @"AP_BITSPERSAMPLE";
         cout << "FileRef is nil for: " << path.UTF8String << endl;
         return nil;
     }
-
+    
     TagLib::Tag *tag = fileRef.tag();
     if (!tag) {
         cout << "Tag is nil" << endl;
@@ -69,66 +69,66 @@ const NSString *AP_BITSPERSAMPLE = @"AP_BITSPERSAMPLE";
 + (nullable NSMutableDictionary *)getMetadata:(NSString *)path
 {
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-
+    
     TagLib::FileRef fileRef(path.UTF8String);
     if (fileRef.isNull()) {
         return nil;
     }
-
+    
     TagLib::Tag *tag = fileRef.tag();
     if (!tag) {
         return nil;
     }
-//    cout << "-- TAG (basic) --" << endl;
-//    cout << "title   - \"" << tag->title()   << "\"" << endl;
-//    cout << "artist  - \"" << tag->artist()  << "\"" << endl;
-//    cout << "album   - \"" << tag->album()   << "\"" << endl;
-//    cout << "year    - \"" << tag->year()    << "\"" << endl;
-//    cout << "comment - \"" << tag->comment() << "\"" << endl;
-//    cout << "track   - \"" << tag->track()   << "\"" << endl;
-//    cout << "genre   - \"" << tag->genre()   << "\"" << endl;
-
+    //    cout << "-- TAG (basic) --" << endl;
+    //    cout << "title   - \"" << tag->title()   << "\"" << endl;
+    //    cout << "artist  - \"" << tag->artist()  << "\"" << endl;
+    //    cout << "album   - \"" << tag->album()   << "\"" << endl;
+    //    cout << "year    - \"" << tag->year()    << "\"" << endl;
+    //    cout << "comment - \"" << tag->comment() << "\"" << endl;
+    //    cout << "track   - \"" << tag->track()   << "\"" << endl;
+    //    cout << "genre   - \"" << tag->genre()   << "\"" << endl;
+    
     TagLib::RIFF::WAV::File *waveFile = dynamic_cast<TagLib::RIFF::WAV::File *>(fileRef.file());
-
+    
     NSString *title = [TaglibWrapper stringFromWchar:tag->title().toCWString()];
-
+    
     // if title is blank, check the wave info tag instead
     if (title == nil && waveFile) {
         title = [TaglibWrapper stringFromWchar:waveFile->InfoTag()->title().toCWString()];
     }
     [dictionary setValue:title ? : @"" forKey:@"TITLE"];
-
+    
     NSString *artist = [TaglibWrapper stringFromWchar:tag->artist().toCWString()];
-
+    
     if ((artist == nil || [artist isEqualToString:@""]) && waveFile) {
         artist = [TaglibWrapper stringFromWchar:waveFile->InfoTag()->artist().toCWString()];
     }
     [dictionary setValue:artist ? : @"" forKey:@"ARTIST"];
-
+    
     NSString *album = [TaglibWrapper stringFromWchar:tag->album().toCWString()];
     if ((album == nil || [album isEqualToString:@""]) && waveFile) {
         album = [TaglibWrapper stringFromWchar:waveFile->InfoTag()->album().toCWString()];
     }
     [dictionary setValue:album ? : @"" forKey:@"ALBUM"];
-
+    
     NSString *year = [NSString stringWithFormat:@"%u", tag->year()];
     [dictionary setValue:year forKey:@"YEAR"];
-
+    
     NSString *comment = [TaglibWrapper stringFromWchar:tag->comment().toCWString()];
     if ((comment == nil || [comment isEqualToString:@""]) && waveFile) {
         comment = [TaglibWrapper stringFromWchar:waveFile->InfoTag()->comment().toCWString()];
     }
     [dictionary setValue:comment ? : @"" forKey:@"COMMENT"];
-
+    
     NSString *track = [NSString stringWithFormat:@"%u", tag->track()];
     [dictionary setValue:track ? : @"" forKey:@"TRACK"];
-
+    
     NSString *genre = [TaglibWrapper stringFromWchar:tag->genre().toCWString()];
     if ((genre == nil || [genre isEqualToString:@""]) && waveFile) {
         genre = [TaglibWrapper stringFromWchar:waveFile->InfoTag()->genre().toCWString()];
     }
     [dictionary setValue:genre ? : @"" forKey:@"GENRE"];
-
+    
     TagLib::PropertyMap tags = fileRef.file()->properties();
     
     // scan through the tag properties where all the other id3 tags will be kept
@@ -137,10 +137,10 @@ const NSString *AP_BITSPERSAMPLE = @"AP_BITSPERSAMPLE";
     for (TagLib::PropertyMap::ConstIterator i = tags.begin(); i != tags.end(); ++i) {
         for (TagLib::StringList::ConstIterator j = i->second.begin(); j != i->second.end(); ++j) {
             // cout << i->first << " - " << '"' << *j << '"' << endl;
-
+            
             NSString *key = [TaglibWrapper stringFromWchar:i->first.toCWString()];
             NSString *object = [TaglibWrapper stringFromWchar:j->toCWString()];
-
+            
             if (key != nil && object != nil) {
                 [dictionary setValue:object ? : @"" forKey:key];
             }
@@ -153,27 +153,27 @@ const NSString *AP_BITSPERSAMPLE = @"AP_BITSPERSAMPLE";
          dictionary:(NSDictionary *)dictionary
 {
     TagLib::FileRef fileRef(path.UTF8String);
-
+    
     if (fileRef.isNull()) {
         cout << "Error: TagLib::FileRef.isNull: Unable to open file:" << path.UTF8String << endl;
         return false;
     }
-
+    
     TagLib::Tag *tag = fileRef.tag();
     if (!tag) {
         cout << "Unable to create tag" << endl;
         return false;
     }
-
+    
     // also duplicate the data into the INFO tag if it's a wave file
     TagLib::RIFF::WAV::File *waveFile = dynamic_cast<TagLib::RIFF::WAV::File *>(fileRef.file());
-
+    
     // these are the non standard tags
     TagLib::PropertyMap tags = fileRef.file()->properties();
-
+    
     for (NSString *key in [dictionary allKeys]) {
         NSString *value = [dictionary objectForKey:key];
-
+        
         if ([key isEqualToString:@"TITLE"]) {
             tag->setTitle(value.UTF8String);
             // also set InfoTag for wave
@@ -210,11 +210,11 @@ const NSString *AP_BITSPERSAMPLE = @"AP_BITSPERSAMPLE";
         TagLib::String tagKey = TagLib::String(key.UTF8String);
         tags.replace(TagLib::String(key.UTF8String), TagLib::StringList(value.UTF8String));
     }
-
+    
     tags.removeEmpty();
     fileRef.file()->setProperties(tags);
     bool result = fileRef.save();
-
+    
     return result;
 }
 
@@ -239,19 +239,19 @@ void printTags(const TagLib::PropertyMap &tags)
              comment:(NSString *)comment
 {
     TagLib::FileRef fileRef(path.UTF8String);
-
+    
     if (fileRef.isNull()) {
         cout << "Unable to write comment" << endl;
         return false;
     }
-
+    
     cout << "Updating comment to: " << comment.UTF8String << endl;
     TagLib::Tag *tag = fileRef.tag();
     if (!tag) {
         cout << "Unable to write tag" << endl;
         return false;
     }
-
+    
     tag->setComment(comment.UTF8String);
     bool result = fileRef.save();
     return result;
@@ -261,40 +261,40 @@ void printTags(const TagLib::PropertyMap &tags)
 + (NSArray *)getChapters:(NSString *)path
 {
     NSMutableArray *array = [[NSMutableArray alloc] init];
-
+    
     TagLib::FileRef fileRef(path.UTF8String);
     if (fileRef.isNull()) {
         return nil;
     }
-
+    
     TagLib::Tag *tag = fileRef.tag();
     if (!tag) {
         return nil;
     }
-
+    
     TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File *>(fileRef.file());
-
+    
     if (!mpegFile) {
         return nil;
     }
     // cout << "Parsing MPEG File" << endl;
-
+    
     TagLib::ID3v2::FrameList chapterList = mpegFile->ID3v2Tag()->frameList("CHAP");
-
+    
     for (TagLib::ID3v2::FrameList::ConstIterator it = chapterList.begin();
          it != chapterList.end();
          ++it) {
         TagLib::ID3v2::ChapterFrame *frame = dynamic_cast<TagLib::ID3v2::ChapterFrame *>(*it);
         if (frame) {
             // cout << "FRAME " << frame->toString() << endl;
-
+            
             if (!frame->embeddedFrameList().isEmpty()) {
                 for (TagLib::ID3v2::FrameList::ConstIterator it = frame->embeddedFrameList().begin(); it != frame->embeddedFrameList().end(); ++it) {
                     // the chapter title is a sub frame
                     if ((*it)->frameID() == "TIT2") {
                         // cout << (*it)->frameID() << " = " << (*it)->toString() << endl;
                         NSString *marker = [TaglibWrapper stringFromWchar:(*it)->toString().toCWString()];
-
+                        
                         marker = [marker stringByAppendingString:[NSString stringWithFormat:@"@%d", frame->startTime()] ];
                         [array addObject:marker];
                     }
@@ -302,7 +302,7 @@ void printTags(const TagLib::PropertyMap &tags)
             }
         }
     }
-
+    
     return array;
 }
 
@@ -314,36 +314,36 @@ void printTags(const TagLib::PropertyMap &tags)
     if (fileRef.isNull()) {
         return false;
     }
-
+    
     TagLib::Tag *tag = fileRef.tag();
     if (!tag) {
         return false;
     }
     TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File *>(fileRef.file());
-
+    
     if (!mpegFile) {
         cout << "TaglibWrapper.setChapters: Not a MPEG File" << endl;
         return false;
     }
-
+    
     // parse array
-
+    
     // remove CHAPter tags
     mpegFile->ID3v2Tag()->removeFrames("CHAP");
-
+    
     // add new CHAP tags
     TagLib::ID3v2::Header header;
-
+    
     // expecting NAME@TIME right now
     for (NSString *object in array) {
         NSArray *items = [object componentsSeparatedByString:@"@"];
         NSString *name = [items objectAtIndex:0];   //shows Description
         int time = [[items objectAtIndex:1] intValue];
-
+        
         TagLib::ID3v2::ChapterFrame *chapter = new TagLib::ID3v2::ChapterFrame(&header, "CHAP");
         chapter->setStartTime(time);
         chapter->setEndTime(time);
-
+        
         // set the chapter title
         TagLib::ID3v2::TextIdentificationFrame *eF = new TagLib::ID3v2::TextIdentificationFrame("TIT2");
         eF->setText(name.UTF8String);
@@ -361,14 +361,14 @@ void printTags(const TagLib::PropertyMap &tags)
     if (fileRef.isNull()) {
         return nil;
     }
-
+    
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
     TagLib::AudioProperties *audioProperties = fileRef.audioProperties();
     TagLib::FLAC::Properties *flacProps = dynamic_cast<TagLib::FLAC::Properties *>(fileRef.audioProperties());
     TagLib::RIFF::AIFF::Properties *aiffProps = dynamic_cast<TagLib::RIFF::AIFF::Properties *>(fileRef.audioProperties());
     TagLib::MP4::Properties *mp4Props = dynamic_cast<TagLib::MP4::Properties *>(fileRef.audioProperties());
     TagLib::RIFF::WAV::Properties *wavProps = dynamic_cast<TagLib::RIFF::WAV::Properties *>(fileRef.audioProperties());
-
+    
     dictionary[AP_LENGTH] = [NSNumber numberWithInt:audioProperties->length()];
     dictionary[AP_BITRATE] = [NSNumber numberWithInt:audioProperties->bitrate()];
     dictionary[AP_SAMPLERATE] = [NSNumber numberWithInt:audioProperties->sampleRate()];
@@ -384,7 +384,7 @@ void printTags(const TagLib::PropertyMap &tags)
     else if (wavProps) {
         dictionary[AP_BITSPERSAMPLE] = [NSNumber numberWithInt:wavProps->bitsPerSample()];
     }
-
+    
     return dictionary;
 }
 
@@ -402,14 +402,14 @@ void printTags(const TagLib::PropertyMap &tags)
 {
     const char *filepath = path.UTF8String;
     TagLib::FileStream *stream = new TagLib::FileStream(filepath);
-
+    
     if (!stream->isOpen()) {
         NSLog(@"Unable to open FileStream: %@", path);
         delete stream;
         return nil;
     }
     const char *value = nil;
-
+    
     if (TagLib::MPEG::File::isSupported(stream)) {
         value = "mp3";
     } else if (TagLib::MP4::File::isSupported(stream)) {
@@ -421,9 +421,9 @@ void printTags(const TagLib::PropertyMap &tags)
     } else if (TagLib::FLAC::File:: isSupported(stream)) {
         value = "flac";
     }
-
+    
     delete stream;
-
+    
     if (value) {
         // NSLog(@"Returning stream file type: %s", value);
         return [NSString stringWithCString:value encoding:NSUTF8StringEncoding];
@@ -437,14 +437,14 @@ void printTags(const TagLib::PropertyMap &tags)
     return [[NSString alloc] initWithBytes:charText length:wcslen(charText) * sizeof(*charText) encoding:NSUTF32LittleEndianStringEncoding];
 }
 
-+ (bool)setCover:(NSString *)path coverURL:(NSURL*)coverURL
++ (bool)setCover:(NSString *)path coverURL:(NSURL*)coverURL mimeType:(NSString*)mimeType
 {
     const char *filepath = path.UTF8String;
     TagLib::FileRef fileRef(path.UTF8String);
     if (fileRef.isNull()) {
         return NO;
     }
-
+    
     NSString *fileType = [TaglibWrapper detectStreamType:path];
     if ([fileType isEqual: @"mp3"]) {
         TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>(fileRef.file());
@@ -460,17 +460,307 @@ void printTags(const TagLib::PropertyMap &tags)
                         mpegFile->ID3v2Tag()->removeFrame(picture);
                     }
                 }
-
+                
                 TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
                 TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
                 picture->setPicture(bv);
-                picture->setMimeType("image/jpeg");
+                picture->setMimeType(mimeType.UTF8String);
                 picture->setType(TagLib::ID3v2::AttachedPictureFrame::FrontCover);
                 
                 TagLib::ID3v2::Tag *tag = mpegFile->ID3v2Tag();
                 if (tag) {
                     tag->addFrame(picture);
                 }
+                return fileRef.save();
+            }
+        }
+    }
+    else if ([fileType isEqual: @"wav"]) {
+        TagLib::RIFF::WAV::File* wavFile = dynamic_cast<TagLib::RIFF::WAV::File*>(fileRef.file());
+        if (wavFile && wavFile->ID3v2Tag()) {
+            NSData *data = [NSData dataWithContentsOfURL:coverURL];
+            if (data != nil && [data length] > 0) {
+                //--- need to remove any existing Picture first or the save doesn't actually work
+                TagLib::ID3v2::FrameList frameList = wavFile->ID3v2Tag()->frameListMap()["APIC"];
+                TagLib::ID3v2::FrameList::Iterator it;
+                for (it = frameList.begin(); it != frameList.end(); ++it) {
+                    TagLib::ID3v2::AttachedPictureFrame *picture = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(*it);
+                    if(picture->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover) {
+                        wavFile->ID3v2Tag()->removeFrame(picture);
+                    }
+                }
+                
+                TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
+                TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                picture->setPicture(bv);
+                picture->setMimeType(mimeType.UTF8String);
+                picture->setType(TagLib::ID3v2::AttachedPictureFrame::FrontCover);
+                
+                TagLib::ID3v2::Tag *tag = wavFile->ID3v2Tag();
+                if (tag) {
+                    tag->addFrame(picture);
+                }
+                return fileRef.save();
+            }
+        }
+    }
+    else if ([fileType isEqual: @"aiff"]) {
+        TagLib::RIFF::AIFF::File* aiffFile = dynamic_cast<TagLib::RIFF::AIFF::File*>(fileRef.file());
+        if (aiffFile && aiffFile->tag()) {
+            NSData *data = [NSData dataWithContentsOfURL:coverURL];
+            if (data != nil && [data length] > 0) {
+                //--- need to remove any existing Picture first or the save doesn't actually work
+                TagLib::ID3v2::FrameList frameList = aiffFile->tag()->frameListMap()["APIC"];
+                TagLib::ID3v2::FrameList::Iterator it;
+                for (it = frameList.begin(); it != frameList.end(); ++it) {
+                    TagLib::ID3v2::AttachedPictureFrame *picture = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(*it);
+                    if (picture->type() == TagLib::ID3v2::AttachedPictureFrame::Other) {
+                        aiffFile->tag()->removeFrame(picture);
+                    }
+                }
+                
+                TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
+                TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                picture->setPicture(bv);
+                picture->setMimeType(mimeType.UTF8String);
+                picture->setType(TagLib::ID3v2::AttachedPictureFrame::Other);
+                
+                TagLib::ID3v2::Tag *tag = aiffFile->tag();
+                if (tag) {
+                    tag->addFrame(picture);
+                }
+                return fileRef.save();
+            }
+        }
+    }
+    else if ([fileType isEqual: @"flac"]) {
+        TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>(fileRef.file());
+        if (flacFile) {
+            NSData *data = [NSData dataWithContentsOfURL:coverURL];
+            if (data != nil && [data length] > 0) {
+                TagLib::FLAC::Picture *picture = new TagLib::FLAC::Picture;
+                picture->setType(TagLib::FLAC::Picture::FrontCover);
+                picture->setMimeType(mimeType.UTF8String);
+                TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                picture->setData(bv);
+                
+                flacFile->removePictures();
+                flacFile->addPicture(picture);
+                
+                return fileRef.save();
+            }
+        }
+    }
+    else if ([fileType isEqual: @"m4a"]) {
+        TagLib::MP4::File* m4aFile = dynamic_cast<TagLib::MP4::File*>(fileRef.file());
+        if (m4aFile) {
+            NSData *data = [NSData dataWithContentsOfURL:coverURL];
+            if (data != nil && [data length] > 0) {
+                int format = TagLib::MP4::AtomDataType::TypeJPEG;
+                if ([mimeType isEqual:@"image/jpeg"] || [mimeType isEqual:@"image/jpg"]) {
+                    format = TagLib::MP4::AtomDataType::TypeJPEG;
+                }
+                else if ([mimeType isEqual:@"image/png"]) {
+                    format = TagLib::MP4::AtomDataType::TypePNG;
+                }
+                else if ([mimeType isEqual:@"image/gif"]) {
+                    format = TagLib::MP4::AtomDataType::TypeGIF;
+                }
+                else if ([mimeType isEqual:@"image/bmp"]) {
+                    format = TagLib::MP4::AtomDataType::TypeBMP;
+                }
+                
+                TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                TagLib::MP4::CoverArt coverArt((TagLib::MP4::CoverArt::Format)format, bv);
+                TagLib::MP4::CoverArtList coverArtList;
+                
+                // append instance
+                coverArtList.append(coverArt);
+                
+                // convert to item
+                TagLib::MP4::Item coverItem(coverArtList);
+                
+                m4aFile->tag()->setItem("covr", coverItem);
+                return fileRef.save();
+            }
+        }
+    }
+    
+    return NO;
+}
+
++ (bool)setCovers:(NSString *)path images:(NSDictionary *)images mimeTypes:(NSDictionary *)mimeTypes
+{
+    const char *filepath = path.UTF8String;
+    TagLib::FileRef fileRef(path.UTF8String);
+    if (fileRef.isNull()) {
+        return NO;
+    }
+    
+    NSString *fileType = [TaglibWrapper detectStreamType:path];
+    if ([fileType isEqual: @"mp3"]) {
+        TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>(fileRef.file());
+        if (mpegFile && mpegFile->ID3v2Tag()) {
+            NSNumber *key;
+            for (key in [images allKeys]) {
+                NSData *data = images[key];
+                CoverArtType type = [key longValue];
+                NSString *mimeType = mimeTypes[key];
+                if (data != nil && [data length] > 0) {
+                    //--- need to remove any existing Picture first or the save doesn't actually work
+                    TagLib::ID3v2::FrameList frameList = mpegFile->ID3v2Tag()->frameListMap()["APIC"];
+                    TagLib::ID3v2::FrameList::Iterator it;
+                    for (it = frameList.begin(); it != frameList.end(); ++it) {
+                        TagLib::ID3v2::AttachedPictureFrame *picture = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(*it);
+                        if(picture->type() == [TaglibWrapper attachedPictureFrameType:type]) {
+                            mpegFile->ID3v2Tag()->removeFrame(picture);
+                        }
+                    }
+                    
+                    TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
+                    TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                    picture->setPicture(bv);
+                    picture->setMimeType(mimeType.UTF8String);
+                    picture->setType([TaglibWrapper attachedPictureFrameType:type]);
+                    
+                    TagLib::ID3v2::Tag *tag = mpegFile->ID3v2Tag();
+                    if (tag) {
+                        tag->addFrame(picture);
+                    }
+                }
+            }
+            return fileRef.save();
+        }
+    }
+    else if ([fileType isEqual: @"wav"]) {
+        TagLib::RIFF::WAV::File* wavFile = dynamic_cast<TagLib::RIFF::WAV::File*>(fileRef.file());
+        if (wavFile && wavFile->ID3v2Tag()) {
+            NSNumber *key;
+            for (key in [images allKeys]) {
+                NSData *data = images[key];
+                CoverArtType type = [key longValue];
+                NSString *mimeType = mimeTypes[key];
+                if (data != nil && [data length] > 0) {
+                    //--- need to remove any existing Picture first or the save doesn't actually work
+                    TagLib::ID3v2::FrameList frameList = wavFile->ID3v2Tag()->frameListMap()["APIC"];
+                    TagLib::ID3v2::FrameList::Iterator it;
+                    for (it = frameList.begin(); it != frameList.end(); ++it) {
+                        TagLib::ID3v2::AttachedPictureFrame *picture = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(*it);
+                        if(picture->type() == [TaglibWrapper attachedPictureFrameType:type]) {
+                            wavFile->ID3v2Tag()->removeFrame(picture);
+                        }
+                    }
+                    
+                    TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
+                    TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                    picture->setPicture(bv);
+                    picture->setMimeType(mimeType.UTF8String);
+                    picture->setType([TaglibWrapper attachedPictureFrameType:type]);
+                    
+                    TagLib::ID3v2::Tag *tag = wavFile->ID3v2Tag();
+                    if (tag) {
+                        tag->addFrame(picture);
+                    }
+                }
+            }
+            return fileRef.save();
+        }
+    }
+    else if ([fileType isEqual: @"aiff"]) {
+        TagLib::RIFF::AIFF::File* aiffFile = dynamic_cast<TagLib::RIFF::AIFF::File*>(fileRef.file());
+        if (aiffFile && aiffFile->tag()) {
+            NSNumber *key;
+            for (key in [images allKeys]) {
+                NSData *data = images[key];
+                CoverArtType type = [key longValue];
+                NSString *mimeType = mimeTypes[key];
+                if (data != nil && [data length] > 0) {
+                    //--- need to remove any existing Picture first or the save doesn't actually work
+                    TagLib::ID3v2::FrameList frameList = aiffFile->tag()->frameListMap()["APIC"];
+                    TagLib::ID3v2::FrameList::Iterator it;
+                    for (it = frameList.begin(); it != frameList.end(); ++it) {
+                        TagLib::ID3v2::AttachedPictureFrame *picture = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(*it);
+                        if(picture->type() == [TaglibWrapper attachedPictureFrameType:type]) {
+                            aiffFile->tag()->removeFrame(picture);
+                        }
+                    }
+                    
+                    TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
+                    TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                    picture->setPicture(bv);
+                    picture->setMimeType(mimeType.UTF8String);
+                    picture->setType([TaglibWrapper attachedPictureFrameType:type]);
+                    
+                    TagLib::ID3v2::Tag *tag = aiffFile->tag();
+                    if (tag) {
+                        tag->addFrame(picture);
+                    }
+                }
+            }
+            return fileRef.save();
+        }
+    }
+    else if ([fileType isEqual: @"flac"]) {
+        TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>(fileRef.file());
+        if (flacFile) {
+            
+            NSNumber *key;
+            for (key in [images allKeys]) {
+                NSData *data = images[key];
+                CoverArtType type = [key longValue];
+                NSString *mimeType = mimeTypes[key];
+                if (data != nil && [data length] > 0) {
+                    TagLib::FLAC::Picture *pictureToRemove = new TagLib::FLAC::Picture;
+                    pictureToRemove->setType([TaglibWrapper flacPictureType:type]);
+                    flacFile->removePicture(pictureToRemove);
+                    
+                    TagLib::FLAC::Picture *picture = new TagLib::FLAC::Picture;
+                    picture->setType([TaglibWrapper flacPictureType:type]);
+                    picture->setMimeType(mimeType.UTF8String);
+                    TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                    picture->setData(bv);
+                    
+                    flacFile->addPicture(picture);
+                }
+            }
+            return fileRef.save();
+        }
+    }
+    else if ([fileType isEqual: @"m4a"]) {
+        TagLib::MP4::File* m4aFile = dynamic_cast<TagLib::MP4::File*>(fileRef.file());
+        if (m4aFile) {
+            TagLib::MP4::CoverArtList coverArtList;
+            NSNumber *key;
+            for (key in [images allKeys]) {
+                NSData *data = images[key];
+                CoverArtType type = [key longValue];
+                NSString *mimeType = mimeTypes[key];
+                if (data != nil && [data length] > 0) {
+                    
+                    int format = TagLib::MP4::AtomDataType::TypeJPEG;
+                    if ([mimeType isEqual:@"image/jpeg"] || [mimeType isEqual:@"image/jpg"]) {
+                        format = TagLib::MP4::AtomDataType::TypeJPEG;
+                    }
+                    else if ([mimeType isEqual:@"image/png"]) {
+                        format = TagLib::MP4::AtomDataType::TypePNG;
+                    }
+                    else if ([mimeType isEqual:@"image/gif"]) {
+                        format = TagLib::MP4::AtomDataType::TypeGIF;
+                    }
+                    else if ([mimeType isEqual:@"image/bmp"]) {
+                        format = TagLib::MP4::AtomDataType::TypeBMP;
+                    }
+                    
+                    TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                    TagLib::MP4::CoverArt coverArt((TagLib::MP4::CoverArt::Format)format, bv);
+                    
+                    // append instance
+                    coverArtList.append(coverArt);
+                }
+                // convert to item
+                TagLib::MP4::Item coverItem(coverArtList);
+                
+                m4aFile->tag()->setItem("covr", coverItem);
                 return fileRef.save();
             }
         }
@@ -524,16 +814,17 @@ void printTags(const TagLib::PropertyMap &tags)
 //    return "application/octet-stream"; // default type
 //}
 
-+ (nullable NSData *)coverArtData:(NSString *)path
++ (nullable NSDictionary *)coverArtData:(NSString *)path
 {
     const char *filepath = path.UTF8String;
     TagLib::FileRef fileRef(path.UTF8String);
     if (fileRef.isNull()) {
         return nil;
     }
-
+    
     NSString *fileType = [TaglibWrapper detectStreamType:path];
     if ([fileType isEqual: @"flac"]) {
+        NSMutableDictionary *pictures = [NSMutableDictionary dictionary];
         TagLib::FLAC::File *flacFile = dynamic_cast<TagLib::FLAC::File *>(fileRef.file());
         const TagLib::List<TagLib::FLAC::Picture*> picturelist = flacFile->pictureList();
         for(TagLib::List<TagLib::FLAC::Picture*>::ConstIterator it = picturelist.begin();
@@ -541,18 +832,14 @@ void printTags(const TagLib::PropertyMap &tags)
             it++) {
             TagLib::FLAC::Picture *picture = (*it);
             if (picture) {
-                if (picture->type() == TagLib::FLAC::Picture::FileIcon ||
-                        picture->type() == TagLib::FLAC::Picture::OtherFileIcon ||
-                        picture->type( )== TagLib::FLAC::Picture::ColouredFish) {
-                    // skip!
-                }
-                else {
-                    return [NSData dataWithBytes:picture->data().data() length:picture->data().size()];
-                }
+                CoverArtType type = [TaglibWrapper flacCoverArtType:picture->type()];
+                pictures[[NSNumber numberWithLong:type]] = [NSData dataWithBytes:picture->data().data() length:picture->data().size()];
             }
         }
+        return pictures;
     }
     else if ([fileType isEqual: @"mp3"]) {
+        NSMutableDictionary *pictures = [NSMutableDictionary dictionary];
         TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>(fileRef.file());
         if (mpegFile && mpegFile->ID3v2Tag()) {
             TagLib::ID3v2::FrameList apic_frames = mpegFile->ID3v2Tag()->frameListMap()["APIC"];
@@ -560,13 +847,20 @@ void printTags(const TagLib::PropertyMap &tags)
                 return nil;
             }
             
-            TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(apic_frames.front());
-            if (picture != NULL) {
-                return [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
+            for(TagLib::List<TagLib::ID3v2::Frame*>::ConstIterator it = apic_frames.begin();
+                it != apic_frames.end();
+                it++) {
+                TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(*it);
+                if (picture != NULL) {
+                    CoverArtType type = [TaglibWrapper coverArtType:picture->type()];
+                    pictures[[NSNumber numberWithLong:type]] = [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
+                }
             }
         }
+        return pictures;
     }
     else if ([fileType isEqual: @"wav"]) {
+        NSMutableDictionary *pictures = [NSMutableDictionary dictionary];
         TagLib::RIFF::WAV::File* wavFile = dynamic_cast<TagLib::RIFF::WAV::File*>(fileRef.file());
         if (wavFile && wavFile->ID3v2Tag()) {
             TagLib::ID3v2::FrameList apic_frames = wavFile->ID3v2Tag()->frameListMap()["APIC"];
@@ -574,45 +868,204 @@ void printTags(const TagLib::PropertyMap &tags)
                 return nil;
             }
             
-            TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(apic_frames.front());
-            if (picture != NULL) {
-                return [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
+            for(TagLib::List<TagLib::ID3v2::Frame*>::ConstIterator it = apic_frames.begin();
+                it != apic_frames.end();
+                it++) {
+                TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(*it);
+                if (picture != NULL) {
+                    CoverArtType type = [TaglibWrapper coverArtType:picture->type()];
+                    pictures[[NSNumber numberWithLong:type]] = [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
+                }
             }
         }
+        return pictures;
     }
     else if ([fileType isEqual: @"aiff"]) {
-        TagLib::RIFF::AIFF::File* wavFile = dynamic_cast<TagLib::RIFF::AIFF::File*>(fileRef.file());
-        if (wavFile && wavFile->tag()) {
-            TagLib::ID3v2::FrameList apic_frames = wavFile->tag()->frameListMap()["APIC"];
+        NSMutableDictionary *pictures = [NSMutableDictionary dictionary];
+        TagLib::RIFF::AIFF::File* aiffFile = dynamic_cast<TagLib::RIFF::AIFF::File*>(fileRef.file());
+        if (aiffFile && aiffFile->tag()) {
+            TagLib::ID3v2::FrameList apic_frames = aiffFile->tag()->frameListMap()["APIC"];
             if (apic_frames.isEmpty()) {
                 return nil;
             }
             
-            TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(apic_frames.front());
-            if (picture != NULL) {
-                return [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
+            for(TagLib::List<TagLib::ID3v2::Frame*>::ConstIterator it = apic_frames.begin();
+                it != apic_frames.end();
+                it++) {
+                TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(*it);
+                if (picture != NULL) {
+                    CoverArtType type = [TaglibWrapper coverArtType:picture->type()];
+                    pictures[[NSNumber numberWithLong:type]] = [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
+                }
             }
         }
+        return pictures;
     }
     else if ([fileType isEqual: @"m4a"]) {
         TagLib::MP4::File* m4aFile = dynamic_cast<TagLib::MP4::File*>(fileRef.file());
-          if (m4aFile) {
+        if (m4aFile) {
             TagLib::MP4::Tag* tag = m4aFile->tag();
-            const TagLib::MP4::ItemListMap& items = tag->itemListMap();
-            TagLib::MP4::ItemListMap::ConstIterator it = items.find("covr");
-            if (it != items.end()) {
-              const TagLib::MP4::CoverArtList& art_list = it->second.toCoverArtList();
-
-              if (!art_list.isEmpty()) {
-                  // Just take the first one for now
-                  const TagLib::MP4::CoverArt& art = art_list.front();
-                  return [NSData dataWithBytes:art.data().data() length:art.data().size()];
-              }
+            TagLib::MP4::Item coverItem = tag->item("covr");
+            const TagLib::MP4::CoverArtList& art_list = coverItem.toCoverArtList();
+            
+            if (!art_list.isEmpty()) {
+                // Just take the first one for now
+                const TagLib::MP4::CoverArt& art = art_list.front();
+                CoverArtType type = other;
+                return [NSDictionary dictionaryWithObject:[NSData dataWithBytes:art.data().data() length:art.data().size()] forKey:[NSNumber numberWithLong:type]];
             }
-          }
+        }
     }
     
     return nil;
+}
+
++ (CoverArtType)coverArtType:(TagLib::ID3v2::AttachedPictureFrame::Type)type {
+    return static_cast<CoverArtType>(type);
+    //    switch(type) {
+    //        case TagLib::ID3v2::AttachedPictureFrame::Other:
+    //            return other;
+    //        case TagLib::ID3v2::AttachedPictureFrame::FileIcon:
+    //            return fileIcon;
+    //        case TagLib::ID3v2::AttachedPictureFrame::OtherFileIcon:
+    //            return otherFileIcon;
+    //        case TagLib::ID3v2::AttachedPictureFrame::FrontCover:
+    //            return frontCover;
+    //        case TagLib::ID3v2::AttachedPictureFrame::BackCover:
+    //            return backCover;
+    //        case TagLib::ID3v2::AttachedPictureFrame::LeafletPage:
+    //            return leafletPage;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Media:
+    //            return media;
+    //        case TagLib::ID3v2::AttachedPictureFrame::LeadArtist:
+    //            return leadArtist;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Artist:
+    //            return artist;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Conductor:
+    //            return conductor;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Band:
+    //            return band;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Composer:
+    //            return composer;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Lyricist:
+    //            return lyricist;
+    //        case TagLib::ID3v2::AttachedPictureFrame::RecordingLocation:
+    //            return recordingLocation;
+    //        case TagLib::ID3v2::AttachedPictureFrame::DuringRecording:
+    //            return duringRecording;
+    //        case TagLib::ID3v2::AttachedPictureFrame::DuringPerformance:
+    //            return duringPerformance;
+    //        case TagLib::ID3v2::AttachedPictureFrame::MovieScreenCapture:
+    //            return movieScreenCapture;
+    //        case TagLib::ID3v2::AttachedPictureFrame::ColouredFish:
+    //            return colouredFish;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Illustration:
+    //            return illustration;
+    //        case TagLib::ID3v2::AttachedPictureFrame::BandLogo:
+    //            return bandLogo;
+    //        case TagLib::ID3v2::AttachedPictureFrame::PublisherLogo:
+    //            return publisherLogo;
+    //    }
+}
+
++ (TagLib::ID3v2::AttachedPictureFrame::Type)attachedPictureFrameType:(CoverArtType)type {
+    return static_cast<TagLib::ID3v2::AttachedPictureFrame::Type>(type);
+    //    switch(type) {
+    //        case TagLib::ID3v2::AttachedPictureFrame::Other:
+    //            return TagLib::ID3v2::AttachedPictureFrame::Other;
+    //        case TagLib::ID3v2::AttachedPictureFrame::FileIcon:
+    //            return TagLib::ID3v2::AttachedPictureFrame::FileIcon;
+    //        case TagLib::ID3v2::AttachedPictureFrame::OtherFileIcon:
+    //            return TagLib::ID3v2::AttachedPictureFrame::OtherFileIcon;
+    //        case TagLib::ID3v2::AttachedPictureFrame::FrontCover:
+    //            return TagLib::ID3v2::AttachedPictureFrame::FrontCover;
+    //        case TagLib::ID3v2::AttachedPictureFrame::BackCover:
+    //            return TagLib::ID3v2::AttachedPictureFrame::BackCover;
+    //        case TagLib::ID3v2::AttachedPictureFrame::LeafletPage:
+    //            return TagLib::ID3v2::AttachedPictureFrame::LeafletPage;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Media:
+    //            return TagLib::ID3v2::AttachedPictureFrame::Media;
+    //        case TagLib::ID3v2::AttachedPictureFrame::LeadArtist:
+    //            return TagLib::ID3v2::AttachedPictureFrame::LeadArtist;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Artist:
+    //            return TagLib::ID3v2::AttachedPictureFrame::Artist;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Conductor:
+    //            return TagLib::ID3v2::AttachedPictureFrame::Conductor;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Band:
+    //            return TagLib::ID3v2::AttachedPictureFrame::Band;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Composer:
+    //            return TagLib::ID3v2::AttachedPictureFrame::Composer;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Lyricist:
+    //            return TagLib::ID3v2::AttachedPictureFrame::Lyricist;
+    //        case TagLib::ID3v2::AttachedPictureFrame::RecordingLocation:
+    //            return TagLib::ID3v2::AttachedPictureFrame::RecordingLocation;
+    //        case TagLib::ID3v2::AttachedPictureFrame::DuringRecording:
+    //            return TagLib::ID3v2::AttachedPictureFrame::DuringRecording;
+    //        case TagLib::ID3v2::AttachedPictureFrame::DuringPerformance:
+    //            return TagLib::ID3v2::AttachedPictureFrame::DuringPerformance;
+    //        case TagLib::ID3v2::AttachedPictureFrame::MovieScreenCapture:
+    //            return TagLib::ID3v2::AttachedPictureFrame::MovieScreenCapture;
+    //        case TagLib::ID3v2::AttachedPictureFrame::ColouredFish:
+    //            return TagLib::ID3v2::AttachedPictureFrame::ColouredFish;
+    //        case TagLib::ID3v2::AttachedPictureFrame::Illustration:
+    //            return TagLib::ID3v2::AttachedPictureFrame::Illustration;
+    //        case TagLib::ID3v2::AttachedPictureFrame::BandLogo:
+    //            return TagLib::ID3v2::AttachedPictureFrame::BandLogo;
+    //        case TagLib::ID3v2::AttachedPictureFrame::PublisherLogo:
+    //            return TagLib::ID3v2::AttachedPictureFrame::PublisherLogo;
+    //    }
+}
+
++ (CoverArtType)flacCoverArtType:(TagLib::FLAC::Picture::Type)type {
+    return static_cast<CoverArtType>(type);
+    //    switch(type) {
+    //        case TagLib::FLAC::Picture::Other:
+    //            return other;
+    //        case TagLib::FLAC::Picture::FileIcon:
+    //            return fileIcon;
+    //        case TagLib::FLAC::Picture::OtherFileIcon:
+    //            return otherFileIcon;
+    //        case TagLib::FLAC::Picture::FrontCover:
+    //            return frontCover;
+    //        case TagLib::FLAC::Picture::BackCover:
+    //            return backCover;
+    //        case TagLib::FLAC::Picture::LeafletPage:
+    //            return leafletPage;
+    //        case TagLib::FLAC::Picture::Media:
+    //            return media;
+    //        case TagLib::FLAC::Picture::LeadArtist:
+    //            return leadArtist;
+    //        case TagLib::FLAC::Picture::Artist:
+    //            return artist;
+    //        case TagLib::FLAC::Picture::Conductor:
+    //            return conductor;
+    //        case TagLib::FLAC::Picture::Band:
+    //            return band;
+    //        case TagLib::FLAC::Picture::Composer:
+    //            return composer;
+    //        case TagLib::FLAC::Picture::Lyricist:
+    //            return lyricist;
+    //        case TagLib::FLAC::Picture::RecordingLocation:
+    //            return recordingLocation;
+    //        case TagLib::FLAC::Picture::DuringRecording:
+    //            return duringRecording;
+    //        case TagLib::FLAC::Picture::DuringPerformance:
+    //            return duringPerformance;
+    //        case TagLib::FLAC::Picture::MovieScreenCapture:
+    //            return movieScreenCapture;
+    //        case TagLib::FLAC::Picture::ColouredFish:
+    //            return colouredFish;
+    //        case TagLib::FLAC::Picture::Illustration:
+    //            return illustration;
+    //        case TagLib::FLAC::Picture::BandLogo:
+    //            return bandLogo;
+    //        case TagLib::FLAC::Picture::PublisherLogo:
+    //            return publisherLogo;
+    //    }
+}
+
++ (TagLib::FLAC::Picture::Type)flacPictureType:(CoverArtType)type {
+    return static_cast<TagLib::FLAC::Picture::Type>(type);
 }
 
 @end

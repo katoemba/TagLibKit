@@ -15,6 +15,30 @@ extern const NSString *AP_BITRATE;
 extern const NSString *AP_SAMPLERATE;
 extern const NSString *AP_BITSPERSAMPLE;
 
+typedef NS_ENUM(NSInteger, CoverArtType) {
+    other = 0,
+    fileIcon,
+    otherFileIcon,
+    frontCover,
+    backCover,
+    leafletPage,
+    media,
+    leadArtist,
+    artist,
+    conductor,
+    band,
+    composer,
+    lyricist,
+    recordingLocation,
+    duringRecording,
+    duringPerformance,
+    movieScreenCapture,
+    colouredFish,
+    illustration,
+    bandLogo,
+    publisherLogo
+};
+
 @interface TaglibWrapper : NSObject
 
 + (nullable NSString *)getTitle:(NSString *)path;
@@ -35,8 +59,9 @@ extern const NSString *AP_BITSPERSAMPLE;
 + (nullable NSString *)detectStreamType:(NSString *)path;
 + (nullable NSMutableDictionary *)getAudioProperties:(NSString *)path;
 
-+ (bool)setCover:(NSString *)path coverURL:(NSURL*)coverURL;
-+ (nullable NSData *)coverArtData:(NSString *)path;
++ (bool)setCover:(NSString *)path coverURL:(NSURL*)coverURL mimeType:(NSString*)mimeType;
++ (bool)setCovers:(NSString *)path images:(NSDictionary *)images mimeTypes:(NSDictionary *)mimeTypes;
++ (nullable NSDictionary *)coverArtData:(NSString *)path;
 
 @end
 
