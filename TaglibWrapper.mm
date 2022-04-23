@@ -922,146 +922,14 @@ void printTags(const TagLib::PropertyMap &tags)
 
 + (CoverArtType)coverArtType:(TagLib::ID3v2::AttachedPictureFrame::Type)type {
     return static_cast<CoverArtType>(type);
-    //    switch(type) {
-    //        case TagLib::ID3v2::AttachedPictureFrame::Other:
-    //            return other;
-    //        case TagLib::ID3v2::AttachedPictureFrame::FileIcon:
-    //            return fileIcon;
-    //        case TagLib::ID3v2::AttachedPictureFrame::OtherFileIcon:
-    //            return otherFileIcon;
-    //        case TagLib::ID3v2::AttachedPictureFrame::FrontCover:
-    //            return frontCover;
-    //        case TagLib::ID3v2::AttachedPictureFrame::BackCover:
-    //            return backCover;
-    //        case TagLib::ID3v2::AttachedPictureFrame::LeafletPage:
-    //            return leafletPage;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Media:
-    //            return media;
-    //        case TagLib::ID3v2::AttachedPictureFrame::LeadArtist:
-    //            return leadArtist;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Artist:
-    //            return artist;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Conductor:
-    //            return conductor;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Band:
-    //            return band;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Composer:
-    //            return composer;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Lyricist:
-    //            return lyricist;
-    //        case TagLib::ID3v2::AttachedPictureFrame::RecordingLocation:
-    //            return recordingLocation;
-    //        case TagLib::ID3v2::AttachedPictureFrame::DuringRecording:
-    //            return duringRecording;
-    //        case TagLib::ID3v2::AttachedPictureFrame::DuringPerformance:
-    //            return duringPerformance;
-    //        case TagLib::ID3v2::AttachedPictureFrame::MovieScreenCapture:
-    //            return movieScreenCapture;
-    //        case TagLib::ID3v2::AttachedPictureFrame::ColouredFish:
-    //            return colouredFish;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Illustration:
-    //            return illustration;
-    //        case TagLib::ID3v2::AttachedPictureFrame::BandLogo:
-    //            return bandLogo;
-    //        case TagLib::ID3v2::AttachedPictureFrame::PublisherLogo:
-    //            return publisherLogo;
-    //    }
 }
 
 + (TagLib::ID3v2::AttachedPictureFrame::Type)attachedPictureFrameType:(CoverArtType)type {
     return static_cast<TagLib::ID3v2::AttachedPictureFrame::Type>(type);
-    //    switch(type) {
-    //        case TagLib::ID3v2::AttachedPictureFrame::Other:
-    //            return TagLib::ID3v2::AttachedPictureFrame::Other;
-    //        case TagLib::ID3v2::AttachedPictureFrame::FileIcon:
-    //            return TagLib::ID3v2::AttachedPictureFrame::FileIcon;
-    //        case TagLib::ID3v2::AttachedPictureFrame::OtherFileIcon:
-    //            return TagLib::ID3v2::AttachedPictureFrame::OtherFileIcon;
-    //        case TagLib::ID3v2::AttachedPictureFrame::FrontCover:
-    //            return TagLib::ID3v2::AttachedPictureFrame::FrontCover;
-    //        case TagLib::ID3v2::AttachedPictureFrame::BackCover:
-    //            return TagLib::ID3v2::AttachedPictureFrame::BackCover;
-    //        case TagLib::ID3v2::AttachedPictureFrame::LeafletPage:
-    //            return TagLib::ID3v2::AttachedPictureFrame::LeafletPage;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Media:
-    //            return TagLib::ID3v2::AttachedPictureFrame::Media;
-    //        case TagLib::ID3v2::AttachedPictureFrame::LeadArtist:
-    //            return TagLib::ID3v2::AttachedPictureFrame::LeadArtist;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Artist:
-    //            return TagLib::ID3v2::AttachedPictureFrame::Artist;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Conductor:
-    //            return TagLib::ID3v2::AttachedPictureFrame::Conductor;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Band:
-    //            return TagLib::ID3v2::AttachedPictureFrame::Band;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Composer:
-    //            return TagLib::ID3v2::AttachedPictureFrame::Composer;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Lyricist:
-    //            return TagLib::ID3v2::AttachedPictureFrame::Lyricist;
-    //        case TagLib::ID3v2::AttachedPictureFrame::RecordingLocation:
-    //            return TagLib::ID3v2::AttachedPictureFrame::RecordingLocation;
-    //        case TagLib::ID3v2::AttachedPictureFrame::DuringRecording:
-    //            return TagLib::ID3v2::AttachedPictureFrame::DuringRecording;
-    //        case TagLib::ID3v2::AttachedPictureFrame::DuringPerformance:
-    //            return TagLib::ID3v2::AttachedPictureFrame::DuringPerformance;
-    //        case TagLib::ID3v2::AttachedPictureFrame::MovieScreenCapture:
-    //            return TagLib::ID3v2::AttachedPictureFrame::MovieScreenCapture;
-    //        case TagLib::ID3v2::AttachedPictureFrame::ColouredFish:
-    //            return TagLib::ID3v2::AttachedPictureFrame::ColouredFish;
-    //        case TagLib::ID3v2::AttachedPictureFrame::Illustration:
-    //            return TagLib::ID3v2::AttachedPictureFrame::Illustration;
-    //        case TagLib::ID3v2::AttachedPictureFrame::BandLogo:
-    //            return TagLib::ID3v2::AttachedPictureFrame::BandLogo;
-    //        case TagLib::ID3v2::AttachedPictureFrame::PublisherLogo:
-    //            return TagLib::ID3v2::AttachedPictureFrame::PublisherLogo;
-    //    }
 }
 
 + (CoverArtType)flacCoverArtType:(TagLib::FLAC::Picture::Type)type {
     return static_cast<CoverArtType>(type);
-    //    switch(type) {
-    //        case TagLib::FLAC::Picture::Other:
-    //            return other;
-    //        case TagLib::FLAC::Picture::FileIcon:
-    //            return fileIcon;
-    //        case TagLib::FLAC::Picture::OtherFileIcon:
-    //            return otherFileIcon;
-    //        case TagLib::FLAC::Picture::FrontCover:
-    //            return frontCover;
-    //        case TagLib::FLAC::Picture::BackCover:
-    //            return backCover;
-    //        case TagLib::FLAC::Picture::LeafletPage:
-    //            return leafletPage;
-    //        case TagLib::FLAC::Picture::Media:
-    //            return media;
-    //        case TagLib::FLAC::Picture::LeadArtist:
-    //            return leadArtist;
-    //        case TagLib::FLAC::Picture::Artist:
-    //            return artist;
-    //        case TagLib::FLAC::Picture::Conductor:
-    //            return conductor;
-    //        case TagLib::FLAC::Picture::Band:
-    //            return band;
-    //        case TagLib::FLAC::Picture::Composer:
-    //            return composer;
-    //        case TagLib::FLAC::Picture::Lyricist:
-    //            return lyricist;
-    //        case TagLib::FLAC::Picture::RecordingLocation:
-    //            return recordingLocation;
-    //        case TagLib::FLAC::Picture::DuringRecording:
-    //            return duringRecording;
-    //        case TagLib::FLAC::Picture::DuringPerformance:
-    //            return duringPerformance;
-    //        case TagLib::FLAC::Picture::MovieScreenCapture:
-    //            return movieScreenCapture;
-    //        case TagLib::FLAC::Picture::ColouredFish:
-    //            return colouredFish;
-    //        case TagLib::FLAC::Picture::Illustration:
-    //            return illustration;
-    //        case TagLib::FLAC::Picture::BandLogo:
-    //            return bandLogo;
-    //        case TagLib::FLAC::Picture::PublisherLogo:
-    //            return publisherLogo;
-    //    }
 }
 
 + (TagLib::FLAC::Picture::Type)flacPictureType:(CoverArtType)type {
