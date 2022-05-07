@@ -60,7 +60,7 @@ typedef NS_ENUM(NSInteger, CoverArtType) {
 + (nullable NSMutableDictionary *)getAudioProperties:(NSString *)path;
 
 + (bool)setCover:(NSString *)path coverURL:(NSURL*)coverURL mimeType:(NSString*)mimeType;
-+ (bool)setCovers:(NSString *)path images:(NSDictionary *)images mimeTypes:(NSDictionary *)mimeTypes;
++ (bool)setCovers:(NSString *)path images:(NSDictionary *)images mimeTypes:(NSDictionary *)mimeTypes imagesToRemove:(NSArray *)imagesToRemove;
 + (nullable NSDictionary *)coverArtData:(NSString *)path;
 
 @end

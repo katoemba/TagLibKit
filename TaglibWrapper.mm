@@ -589,7 +589,7 @@ void printTags(const TagLib::PropertyMap &tags)
     return NO;
 }
 
-+ (bool)setCovers:(NSString *)path images:(NSDictionary *)images mimeTypes:(NSDictionary *)mimeTypes
++ (bool)setCovers:(NSString *)path images:(NSDictionary *)images mimeTypes:(NSDictionary *)mimeTypes imagesToRemove:(NSArray *)imagesToRemove
 {
     const char *filepath = path.UTF8String;
     TagLib::FileRef fileRef(path.UTF8String);
@@ -597,17 +597,20 @@ void printTags(const TagLib::PropertyMap &tags)
         return NO;
     }
     
+    NSMutableSet *allKeys = [NSMutableSet setWithArray:[images allKeys]];
+    [allKeys addObjectsFromArray:imagesToRemove];
     NSString *fileType = [TaglibWrapper detectStreamType:path];
     if ([fileType isEqual: @"mp3"]) {
         TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>(fileRef.file());
         if (mpegFile && mpegFile->ID3v2Tag()) {
             NSNumber *key;
-            for (key in [images allKeys]) {
+            for (key in allKeys) {
                 NSData *data = images[key];
                 CoverArtType type = [key longValue];
                 NSString *mimeType = mimeTypes[key];
-                if (data != nil && [data length] > 0) {
-                    //--- need to remove any existing Picture first or the save doesn't actually work
+                
+                //--- need to remove any existing Picture first or the save doesn't actually work
+                if ((data != nil && [data length] > 0) || [imagesToRemove containsObject:key]) {
                     TagLib::ID3v2::FrameList frameList = mpegFile->ID3v2Tag()->frameListMap()["APIC"];
                     TagLib::ID3v2::FrameList::Iterator it;
                     for (it = frameList.begin(); it != frameList.end(); ++it) {
@@ -616,7 +619,9 @@ void printTags(const TagLib::PropertyMap &tags)
                             mpegFile->ID3v2Tag()->removeFrame(picture);
                         }
                     }
+                }
                     
+                if (data != nil && [data length] > 0) {
                     TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
                     TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
                     picture->setPicture(bv);
@@ -636,12 +641,13 @@ void printTags(const TagLib::PropertyMap &tags)
         TagLib::RIFF::WAV::File* wavFile = dynamic_cast<TagLib::RIFF::WAV::File*>(fileRef.file());
         if (wavFile && wavFile->ID3v2Tag()) {
             NSNumber *key;
-            for (key in [images allKeys]) {
+            for (key in allKeys) {
                 NSData *data = images[key];
                 CoverArtType type = [key longValue];
                 NSString *mimeType = mimeTypes[key];
-                if (data != nil && [data length] > 0) {
-                    //--- need to remove any existing Picture first or the save doesn't actually work
+
+                //--- need to remove any existing Picture first or the save doesn't actually work
+                if ((data != nil && [data length] > 0) || [imagesToRemove containsObject:key]) {
                     TagLib::ID3v2::FrameList frameList = wavFile->ID3v2Tag()->frameListMap()["APIC"];
                     TagLib::ID3v2::FrameList::Iterator it;
                     for (it = frameList.begin(); it != frameList.end(); ++it) {
@@ -650,7 +656,9 @@ void printTags(const TagLib::PropertyMap &tags)
                             wavFile->ID3v2Tag()->removeFrame(picture);
                         }
                     }
+                }
                     
+                if (data != nil && [data length] > 0) {
                     TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
                     TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
                     picture->setPicture(bv);
@@ -670,12 +678,13 @@ void printTags(const TagLib::PropertyMap &tags)
         TagLib::RIFF::AIFF::File* aiffFile = dynamic_cast<TagLib::RIFF::AIFF::File*>(fileRef.file());
         if (aiffFile && aiffFile->tag()) {
             NSNumber *key;
-            for (key in [images allKeys]) {
+            for (key in allKeys) {
                 NSData *data = images[key];
                 CoverArtType type = [key longValue];
                 NSString *mimeType = mimeTypes[key];
-                if (data != nil && [data length] > 0) {
-                    //--- need to remove any existing Picture first or the save doesn't actually work
+
+                //--- need to remove any existing Picture first or the save doesn't actually work
+                if ((data != nil && [data length] > 0) || [imagesToRemove containsObject:key]) {
                     TagLib::ID3v2::FrameList frameList = aiffFile->tag()->frameListMap()["APIC"];
                     TagLib::ID3v2::FrameList::Iterator it;
                     for (it = frameList.begin(); it != frameList.end(); ++it) {
@@ -684,7 +693,9 @@ void printTags(const TagLib::PropertyMap &tags)
                             aiffFile->tag()->removeFrame(picture);
                         }
                     }
-                    
+                }
+                
+                if (data != nil && [data length] > 0) {
                     TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
                     TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
                     picture->setPicture(bv);
@@ -705,15 +716,27 @@ void printTags(const TagLib::PropertyMap &tags)
         if (flacFile) {
             
             NSNumber *key;
-            for (key in [images allKeys]) {
+            for (key in allKeys) {
                 NSData *data = images[key];
                 CoverArtType type = [key longValue];
                 NSString *mimeType = mimeTypes[key];
+                
+                //--- need to remove any existing Picture first or the save doesn't actually work
+                if ((data != nil && [data length] > 0) || [imagesToRemove containsObject:key]) {
+                    NSMutableDictionary *pictures = [NSMutableDictionary dictionary];
+                    TagLib::FLAC::File *flacFile = dynamic_cast<TagLib::FLAC::File *>(fileRef.file());
+                    const TagLib::List<TagLib::FLAC::Picture*> picturelist = flacFile->pictureList();
+                    for(TagLib::List<TagLib::FLAC::Picture*>::ConstIterator it = picturelist.begin(); it != picturelist.end(); it++) {
+                        TagLib::FLAC::Picture *pictureToRemove = (*it);
+                        if (pictureToRemove) {
+                            if (pictureToRemove->type() == type) {
+                                flacFile->removePicture(pictureToRemove);
+                            }
+                        }
+                    }
+                }
+                
                 if (data != nil && [data length] > 0) {
-                    TagLib::FLAC::Picture *pictureToRemove = new TagLib::FLAC::Picture;
-                    pictureToRemove->setType([TaglibWrapper flacPictureType:type]);
-                    flacFile->removePicture(pictureToRemove);
-                    
                     TagLib::FLAC::Picture *picture = new TagLib::FLAC::Picture;
                     picture->setType([TaglibWrapper flacPictureType:type]);
                     picture->setMimeType(mimeType.UTF8String);
@@ -731,7 +754,7 @@ void printTags(const TagLib::PropertyMap &tags)
         if (m4aFile) {
             TagLib::MP4::CoverArtList coverArtList;
             NSNumber *key;
-            for (key in [images allKeys]) {
+            for (key in allKeys) {
                 NSData *data = images[key];
                 CoverArtType type = [key longValue];
                 NSString *mimeType = mimeTypes[key];
