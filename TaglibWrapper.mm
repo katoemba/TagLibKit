@@ -753,13 +753,13 @@ void printTags(const TagLib::PropertyMap &tags)
         TagLib::MP4::File* m4aFile = dynamic_cast<TagLib::MP4::File*>(fileRef.file());
         if (m4aFile) {
             TagLib::MP4::CoverArtList coverArtList;
+            
             NSNumber *key;
             for (key in allKeys) {
                 NSData *data = images[key];
                 CoverArtType type = [key longValue];
                 NSString *mimeType = mimeTypes[key];
                 if (data != nil && [data length] > 0) {
-                    
                     int format = TagLib::MP4::AtomDataType::TypeJPEG;
                     if ([mimeType isEqual:@"image/jpeg"] || [mimeType isEqual:@"image/jpg"]) {
                         format = TagLib::MP4::AtomDataType::TypeJPEG;
@@ -780,12 +780,18 @@ void printTags(const TagLib::PropertyMap &tags)
                     // append instance
                     coverArtList.append(coverArt);
                 }
-                // convert to item
-                TagLib::MP4::Item coverItem(coverArtList);
-                
-                m4aFile->tag()->setItem("covr", coverItem);
-                return fileRef.save();
             }
+
+            // convert to item
+            TagLib::MP4::Item coverItem(coverArtList);
+
+            if (imagesToRemove.count > 0) {
+                m4aFile->tag()->removeItem("covr");
+            }
+            if (coverArtList.size() > 0) {
+                m4aFile->tag()->setItem("covr", coverItem);
+            }
+            return fileRef.save();
         }
     }
     
