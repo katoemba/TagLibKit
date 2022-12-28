@@ -175,20 +175,20 @@ const NSString *AP_BITSPERSAMPLE = @"AP_BITSPERSAMPLE";
         NSString *value = [dictionary objectForKey:key];
         
         if ([key isEqualToString:@"TITLE"]) {
-            tag->setTitle(value.UTF8String);
+            tag->setTitle(TagLib::String(value.UTF8String, TagLib::String::Type::UTF8));
             // also set InfoTag for wave
             if (waveFile) {
-                waveFile->InfoTag()->setTitle(value.UTF8String);
+                waveFile->InfoTag()->setTitle(TagLib::String(value.UTF8String, TagLib::String::Type::UTF8));
             }
         } else if ([key isEqualToString:@"ARTIST"]) {
-            tag->setArtist(value.UTF8String);
+            tag->setArtist(TagLib::String(value.UTF8String, TagLib::String::Type::UTF8));
             if (waveFile) {
-                waveFile->InfoTag()->setArtist(value.UTF8String);
+                waveFile->InfoTag()->setArtist(TagLib::String(value.UTF8String, TagLib::String::Type::UTF8));
             }
         } else if ([key isEqualToString:@"ALBUM"]) {
-            tag->setAlbum(value.UTF8String);
+            tag->setAlbum(TagLib::String(value.UTF8String, TagLib::String::Type::UTF8));
             if (waveFile) {
-                waveFile->InfoTag()->setAlbum(value.UTF8String);
+                waveFile->InfoTag()->setAlbum(TagLib::String(value.UTF8String, TagLib::String::Type::UTF8));
             }
         } else if ([key isEqualToString:@"YEAR"]) {
             tag->setYear(value.intValue);
@@ -201,14 +201,15 @@ const NSString *AP_BITSPERSAMPLE = @"AP_BITSPERSAMPLE";
                 waveFile->InfoTag()->setTrack(value.intValue);
             }
         } else if ([key isEqualToString:@"COMMENT"]) {
-            tag->setComment(value.UTF8String);
+            tag->setComment(TagLib::String(value.UTF8String, TagLib::String::Type::UTF8));
             if (waveFile) {
-                waveFile->InfoTag()->setComment(value.UTF8String);
+                waveFile->InfoTag()->setComment(TagLib::String(value.UTF8String, TagLib::String::Type::UTF8));
             }
         }
         
-        TagLib::String tagKey = TagLib::String(key.UTF8String);
-        tags.replace(TagLib::String(key.UTF8String), TagLib::StringList(value.UTF8String));
+        TagLib::String tagKey = TagLib::String(key.UTF8String, TagLib::String::Type::UTF8);
+        TagLib::String tagValue = TagLib::String(value.UTF8String, TagLib::String::Type::UTF8);
+        tags.replace(tagKey, TagLib::StringList(tagValue));
     }
     
     tags.removeEmpty();
@@ -346,7 +347,7 @@ void printTags(const TagLib::PropertyMap &tags)
         
         // set the chapter title
         TagLib::ID3v2::TextIdentificationFrame *eF = new TagLib::ID3v2::TextIdentificationFrame("TIT2");
-        eF->setText(name.UTF8String);
+        eF->setText(TagLib::String(name.UTF8String, TagLib::String::Type::UTF8));
         chapter->addEmbeddedFrame(eF);
         mpegFile->ID3v2Tag()->addFrame(chapter);
     }
@@ -797,51 +798,6 @@ void printTags(const TagLib::PropertyMap &tags)
     
     return NO;
 }
-
-//+ (String*)mimeTypeByGuessingFromData:(NSData *)data {
-//
-//    char bytes[12] = {0};
-//    [data getBytes:&bytes length:12];
-//
-//    const char bmp[2] = {'B', 'M'};
-//    const char gif[3] = {'G', 'I', 'F'};
-////    const char swf[3] = {'F', 'W', 'S'};
-////    const char swc[3] = {'C', 'W', 'S'};
-//    const char jpg[3] = {static_cast<char>(0xff), static_cast<char>(0xd8), static_cast<char>(0xff)};
-//    const char psd[4] = {'8', 'B', 'P', 'S'};
-//    const char iff[4] = {'F', 'O', 'R', 'M'};
-//    const char webp[4] = {'R', 'I', 'F', 'F'};
-//    const char ico[4] = {0x00, 0x00, 0x01, 0x00};
-//    const char tif_ii[4] = {'I','I', 0x2A, 0x00};
-//    const char tif_mm[4] = {'M','M', 0x00, 0x2A};
-//    const char png[8] = {static_cast<char>(0x89), 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
-//    const char jp2[12] = {0x00, 0x00, 0x00, 0x0c, 0x6a, 0x50, 0x20, 0x20, 0x0d, 0x0a, static_cast<char>(0x87), 0x0a};
-//
-//
-//    if (!memcmp(bytes, bmp, 2)) {
-//        return "image/x-ms-bmp";
-//    } else if (!memcmp(bytes, gif, 3)) {
-//        return "image/gif";
-//    } else if (!memcmp(bytes, jpg, 3)) {
-//        return "image/jpeg";
-//    } else if (!memcmp(bytes, psd, 4)) {
-//        return "image/psd";
-//    } else if (!memcmp(bytes, iff, 4)) {
-//        return "image/iff";
-//    } else if (!memcmp(bytes, webp, 4)) {
-//        return "image/webp";
-//    } else if (!memcmp(bytes, ico, 4)) {
-//        return "image/vnd.microsoft.icon";
-//    } else if (!memcmp(bytes, tif_ii, 4) || !memcmp(bytes, tif_mm, 4)) {
-//        return "image/tiff";
-//    } else if (!memcmp(bytes, png, 8)) {
-//        return "image/png";
-//    } else if (!memcmp(bytes, jp2, 12)) {
-//        return "image/jp2";
-//    }
-//
-//    return "application/octet-stream"; // default type
-//}
 
 + (nullable NSDictionary *)coverArtData:(NSString *)path
 {
