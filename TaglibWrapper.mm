@@ -17,6 +17,7 @@
 #import <taglib/flacfile.h>
 #import <taglib/mpegfile.h>
 #import <taglib/mp4file.h>
+#import <taglib/dsffile.h>
 #import <taglib/chapterframe.h>
 #import <taglib/tstringlist.h>
 #import <taglib/tpropertymap.h>
@@ -369,8 +370,9 @@ void printTags(const TagLib::PropertyMap &tags)
     TagLib::RIFF::AIFF::Properties *aiffProps = dynamic_cast<TagLib::RIFF::AIFF::Properties *>(fileRef.audioProperties());
     TagLib::MP4::Properties *mp4Props = dynamic_cast<TagLib::MP4::Properties *>(fileRef.audioProperties());
     TagLib::RIFF::WAV::Properties *wavProps = dynamic_cast<TagLib::RIFF::WAV::Properties *>(fileRef.audioProperties());
+    TagLib::DSF::Properties *dsfProps = dynamic_cast<TagLib::DSF::Properties *>(fileRef.audioProperties());
     
-    dictionary[AP_LENGTH] = [NSNumber numberWithInt:audioProperties->length()];
+    dictionary[AP_LENGTH] = [NSNumber numberWithInt:audioProperties->lengthInSeconds()];
     dictionary[AP_BITRATE] = [NSNumber numberWithInt:audioProperties->bitrate()];
     dictionary[AP_SAMPLERATE] = [NSNumber numberWithInt:audioProperties->sampleRate()];
     if (flacProps) {
@@ -419,8 +421,10 @@ void printTags(const TagLib::PropertyMap &tags)
         value = "wav";
     } else if (TagLib::RIFF::AIFF::File::isSupported(stream)) {
         value = "aiff";
-    } else if (TagLib::FLAC::File:: isSupported(stream)) {
+    } else if (TagLib::FLAC::File::isSupported(stream)) {
         value = "flac";
+    } else if (TagLib::DSF::File::isSupported(stream)) {
+        value = "dsf";
     }
     
     delete stream;
@@ -586,6 +590,36 @@ void printTags(const TagLib::PropertyMap &tags)
             }
         }
     }
+    else if ([fileType isEqual: @"dsf"]) {
+        TagLib::DSF::File* dsfFile = dynamic_cast<TagLib::DSF::File*>(fileRef.file());
+        if (dsfFile && dsfFile->tag()) {
+            NSData *data = [NSData dataWithContentsOfURL:coverURL];
+            if (data != nil && [data length] > 0) {
+                //--- need to remove any existing Picture first or the save doesn't actually work
+                TagLib::ID3v2::FrameList frameList = dsfFile->tag()->frameListMap()["APIC"];
+                TagLib::ID3v2::FrameList::Iterator it;
+                for (it = frameList.begin(); it != frameList.end(); ++it) {
+                    TagLib::ID3v2::AttachedPictureFrame *picture = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(*it);
+                    if (picture->type() == TagLib::ID3v2::AttachedPictureFrame::Other) {
+                        dsfFile->tag()->removeFrame(picture);
+                    }
+                }
+                
+                TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
+                TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                picture->setPicture(bv);
+                picture->setMimeType(mimeType.UTF8String);
+                picture->setType(TagLib::ID3v2::AttachedPictureFrame::Other);
+                
+                TagLib::ID3v2::Tag *tag = dsfFile->tag();
+                if (tag) {
+                    tag->addFrame(picture);
+                }
+                return fileRef.save();
+            }
+        }
+    }
+
     
     return NO;
 }
@@ -607,7 +641,7 @@ void printTags(const TagLib::PropertyMap &tags)
             NSNumber *key;
             for (key in allKeys) {
                 NSData *data = images[key];
-                CoverArtType type = [key longValue];
+                CoverArtType type = (CoverArtType)[key longValue];
                 NSString *mimeType = mimeTypes[key];
                 
                 //--- need to remove any existing Picture first or the save doesn't actually work
@@ -644,7 +678,7 @@ void printTags(const TagLib::PropertyMap &tags)
             NSNumber *key;
             for (key in allKeys) {
                 NSData *data = images[key];
-                CoverArtType type = [key longValue];
+                CoverArtType type = (CoverArtType)[key longValue];
                 NSString *mimeType = mimeTypes[key];
 
                 //--- need to remove any existing Picture first or the save doesn't actually work
@@ -681,7 +715,7 @@ void printTags(const TagLib::PropertyMap &tags)
             NSNumber *key;
             for (key in allKeys) {
                 NSData *data = images[key];
-                CoverArtType type = [key longValue];
+                CoverArtType type = (CoverArtType)[key longValue];
                 NSString *mimeType = mimeTypes[key];
 
                 //--- need to remove any existing Picture first or the save doesn't actually work
@@ -719,7 +753,7 @@ void printTags(const TagLib::PropertyMap &tags)
             NSNumber *key;
             for (key in allKeys) {
                 NSData *data = images[key];
-                CoverArtType type = [key longValue];
+                CoverArtType type = (CoverArtType)[key longValue];
                 NSString *mimeType = mimeTypes[key];
                 
                 //--- need to remove any existing Picture first or the save doesn't actually work
@@ -730,7 +764,7 @@ void printTags(const TagLib::PropertyMap &tags)
                     for(TagLib::List<TagLib::FLAC::Picture*>::ConstIterator it = picturelist.begin(); it != picturelist.end(); it++) {
                         TagLib::FLAC::Picture *pictureToRemove = (*it);
                         if (pictureToRemove) {
-                            if (pictureToRemove->type() == type) {
+                            if ((CoverArtType)pictureToRemove->type() == type) {
                                 flacFile->removePicture(pictureToRemove);
                             }
                         }
@@ -758,7 +792,7 @@ void printTags(const TagLib::PropertyMap &tags)
             NSNumber *key;
             for (key in allKeys) {
                 NSData *data = images[key];
-                CoverArtType type = [key longValue];
+                CoverArtType type = (CoverArtType)[key longValue];
                 NSString *mimeType = mimeTypes[key];
                 if (data != nil && [data length] > 0) {
                     int format = TagLib::MP4::AtomDataType::TypeJPEG;
@@ -795,6 +829,43 @@ void printTags(const TagLib::PropertyMap &tags)
             return fileRef.save();
         }
     }
+    else if ([fileType isEqual: @"dsf"]) {
+        TagLib::DSF::File* dsfFile = dynamic_cast<TagLib::DSF::File*>(fileRef.file());
+        if (dsfFile && dsfFile->tag()) {
+            NSNumber *key;
+            for (key in allKeys) {
+                NSData *data = images[key];
+                CoverArtType type = (CoverArtType)[key longValue];
+                NSString *mimeType = mimeTypes[key];
+
+                //--- need to remove any existing Picture first or the save doesn't actually work
+                if ((data != nil && [data length] > 0) || [imagesToRemove containsObject:key]) {
+                    TagLib::ID3v2::FrameList frameList = dsfFile->tag()->frameListMap()["APIC"];
+                    TagLib::ID3v2::FrameList::Iterator it;
+                    for (it = frameList.begin(); it != frameList.end(); ++it) {
+                        TagLib::ID3v2::AttachedPictureFrame *picture = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(*it);
+                        if(picture->type() == [TaglibWrapper attachedPictureFrameType:type]) {
+                            dsfFile->tag()->removeFrame(picture);
+                        }
+                    }
+                }
+                
+                if (data != nil && [data length] > 0) {
+                    TagLib::ID3v2::AttachedPictureFrame *picture = new TagLib::ID3v2::AttachedPictureFrame();
+                    TagLib::ByteVector bv = TagLib::ByteVector((const char *)[data bytes], (int)[data length]);
+                    picture->setPicture(bv);
+                    picture->setMimeType(mimeType.UTF8String);
+                    picture->setType([TaglibWrapper attachedPictureFrameType:type]);
+                    
+                    TagLib::ID3v2::Tag *tag = dsfFile->tag();
+                    if (tag) {
+                        tag->addFrame(picture);
+                    }
+                }
+            }
+            return fileRef.save();
+        }
+    }
     
     return NO;
 }
@@ -817,7 +888,7 @@ void printTags(const TagLib::PropertyMap &tags)
             it++) {
             TagLib::FLAC::Picture *picture = (*it);
             if (picture) {
-                CoverArtType type = [TaglibWrapper flacCoverArtType:picture->type()];
+                CoverArtType type = (CoverArtType)[TaglibWrapper flacCoverArtType:picture->type()];
                 pictures[[NSNumber numberWithLong:type]] = [NSData dataWithBytes:picture->data().data() length:picture->data().size()];
             }
         }
@@ -837,7 +908,7 @@ void printTags(const TagLib::PropertyMap &tags)
                 it++) {
                 TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(*it);
                 if (picture != NULL) {
-                    CoverArtType type = [TaglibWrapper coverArtType:picture->type()];
+                    CoverArtType type = (CoverArtType)[TaglibWrapper coverArtType:picture->type()];
                     pictures[[NSNumber numberWithLong:type]] = [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
                 }
             }
@@ -858,7 +929,7 @@ void printTags(const TagLib::PropertyMap &tags)
                 it++) {
                 TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(*it);
                 if (picture != NULL) {
-                    CoverArtType type = [TaglibWrapper coverArtType:picture->type()];
+                    CoverArtType type = (CoverArtType)[TaglibWrapper coverArtType:picture->type()];
                     pictures[[NSNumber numberWithLong:type]] = [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
                 }
             }
@@ -879,7 +950,7 @@ void printTags(const TagLib::PropertyMap &tags)
                 it++) {
                 TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(*it);
                 if (picture != NULL) {
-                    CoverArtType type = [TaglibWrapper coverArtType:picture->type()];
+                    CoverArtType type = (CoverArtType)[TaglibWrapper coverArtType:picture->type()];
                     pictures[[NSNumber numberWithLong:type]] = [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
                 }
             }
@@ -901,7 +972,28 @@ void printTags(const TagLib::PropertyMap &tags)
             }
         }
     }
-    
+    else if ([fileType isEqual: @"dsf"]) {
+        NSMutableDictionary *pictures = [NSMutableDictionary dictionary];
+        TagLib::DSF::File* dsfFile = dynamic_cast<TagLib::DSF::File*>(fileRef.file());
+        if (dsfFile && dsfFile->tag()) {
+            TagLib::ID3v2::FrameList apic_frames = dsfFile->tag()->frameListMap()["APIC"];
+            if (apic_frames.isEmpty()) {
+                return nil;
+            }
+            
+            for(TagLib::List<TagLib::ID3v2::Frame*>::ConstIterator it = apic_frames.begin();
+                it != apic_frames.end();
+                it++) {
+                TagLib::ID3v2::AttachedPictureFrame* picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(*it);
+                if (picture != NULL) {
+                    CoverArtType type = (CoverArtType)[TaglibWrapper coverArtType:picture->type()];
+                    pictures[[NSNumber numberWithLong:type]] = [NSData dataWithBytes:picture->picture().data() length:picture->picture().size()];
+                }
+            }
+        }
+        return pictures;
+    }
+
     return nil;
 }
 

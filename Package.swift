@@ -17,7 +17,9 @@ let package = Package(
         .product(name: "TagLib", package: "TagLib")
       ],
       path: "",
-      publicHeadersPath: ""
+      publicHeadersPath: "",
+      cxxSettings: [
+        .unsafeFlags(["-std=c++17"])]
     )
   ]
 )
