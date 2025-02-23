@@ -61,6 +61,7 @@ typedef NS_ENUM(NSInteger, CoverArtType) {
 
 + (bool)setCover:(NSString *)path coverURL:(NSURL*)coverURL mimeType:(NSString*)mimeType;
 + (bool)setCovers:(NSString *)path images:(NSDictionary *)images mimeTypes:(NSDictionary *)mimeTypes imagesToRemove:(NSArray *)imagesToRemove;
++ (bool)setMetadataAndCovers:(NSString *)path dictionary:(NSDictionary *)dictionary images:(NSDictionary *)images mimeTypes:(NSDictionary *)mimeTypes imagesToRemove:(NSArray *)imagesToRemove;
 + (nullable NSDictionary *)coverArtData:(NSString *)path;
 
 @end
